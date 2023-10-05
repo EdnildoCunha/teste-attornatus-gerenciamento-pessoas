@@ -26,25 +26,23 @@ public class EnderecoServiceImpl implements EnderecoService {
 
 
     private EnderecoRepository enderecoRepository;
-    private EnderecoMapper enderecoMapper;
-    private PessoaMapper pessoaMapper;
     private PessoaService pessoaService;
 
     @Override
     public EnderecoDTO save(Long idPessoa, CreateOrUpdateEnderecoDTO enderecoDTO) throws PessoaNotFoundException {
-        Pessoa pessoa = pessoaMapper.toEntity(pessoaService.findById(idPessoa));
-        Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
+        Pessoa pessoa = PessoaMapper.toEntity(pessoaService.findById(idPessoa));
+        Endereco endereco = EnderecoMapper.toEntity(enderecoDTO);
         endereco.setPessoa(pessoa);
         if(Boolean.TRUE.equals(endereco.getPrincipal())){
             notPrincipalAddress(endereco);
         }
-        return enderecoMapper.toDto(enderecoRepository.save(endereco));
+        return EnderecoMapper.toDto(enderecoRepository.save(endereco));
     }
 
     @Override
     public List<EnderecoDTO> listAllAddressForAPerson(Long idPessoa) throws PessoaNotFoundException {
         pessoaService.findById(idPessoa);
-        return enderecoMapper.toDtoList(enderecoRepository.findByPessoaId(idPessoa));
+        return EnderecoMapper.toDtoList(enderecoRepository.findByPessoaId(idPessoa));
     }
 
     private void notPrincipalAddress (Endereco endereco) {
@@ -64,7 +62,7 @@ public class EnderecoServiceImpl implements EnderecoService {
         if(Boolean.TRUE.equals(endereco.getPrincipal())){
             notPrincipalAddress(endereco);
         }
-        return enderecoMapper.toDto(enderecoRepository.save(endereco));
+        return EnderecoMapper.toDto(enderecoRepository.save(endereco));
     }
 
     private Endereco findById(Long idEndereco) throws EnderecoNotFoundException {
@@ -74,8 +72,8 @@ public class EnderecoServiceImpl implements EnderecoService {
 
     @Override
     public EnderecoDTO findByIdAndIdPessoa(Long idEndereco, Long idPessoa) throws PessoaNotFoundException, EnderecoNotFoundException {
-        Pessoa pessoa = pessoaMapper.toEntity(pessoaService.findById(idPessoa));
-        return enderecoRepository.findByIdAndPessoa(idEndereco, pessoa).map(enderecoMapper :: toDto)
+        Pessoa pessoa = PessoaMapper.toEntity(pessoaService.findById(idPessoa));
+        return enderecoRepository.findByIdAndPessoa(idEndereco, pessoa).map(EnderecoMapper :: toDto)
                 .orElseThrow(() -> new EnderecoNotFoundException("Endereco não encontrado, idPessoa: " + idPessoa + " idEndereco: " + idEndereco));
     }
 }
