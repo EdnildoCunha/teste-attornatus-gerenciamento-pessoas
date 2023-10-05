@@ -1,13 +1,18 @@
 package teste.attornatus.gupy.pessoas.service.implement;
 
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import teste.attornatus.gupy.pessoas.domain.Endereco;
+import teste.attornatus.gupy.pessoas.domain.Pessoa;
 import teste.attornatus.gupy.pessoas.repository.EnderecoRepository;
 import teste.attornatus.gupy.pessoas.repository.PessoaRepository;
 import teste.attornatus.gupy.pessoas.service.EnderecoService;
+import teste.attornatus.gupy.pessoas.service.PessoaService;
+import teste.attornatus.gupy.pessoas.service.dto.CreateOrUpdateEnderecoDTO;
 import teste.attornatus.gupy.pessoas.service.dto.EnderecoDTO;
 import teste.attornatus.gupy.pessoas.service.mapper.EnderecoMapper;
+import teste.attornatus.gupy.pessoas.service.mapper.PessoaMapper;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -21,11 +26,14 @@ public class EnderecoServiceImpl implements EnderecoService {
 
     private EnderecoRepository enderecoRepository;
     private EnderecoMapper enderecoMapper;
-    private PessoaRepository pessoaRepository;
+    private PessoaMapper pessoaMapper;
+    private PessoaService pessoaService;
 
     @Override
-    public EnderecoDTO save(EnderecoDTO enderecoDTO) {
+    public EnderecoDTO save(Long idPessoa, CreateOrUpdateEnderecoDTO enderecoDTO) {
         Endereco endereco = enderecoMapper.toEntity(enderecoDTO);
+        Pessoa pessoa = pessoaMapper.toEntity(pessoaService.findById(idPessoa));
+        endereco.setPessoa(pessoa);
         if(Boolean.TRUE.equals(endereco.getPrincipal())){
             notPrincipalAddress(endereco);
         }
@@ -33,19 +41,8 @@ public class EnderecoServiceImpl implements EnderecoService {
     }
 
     @Override
-    public List<EnderecoDTO> ListAllAddresForAPerson(Long idPessoa) {
+    public List<EnderecoDTO> listAllAddressForAPerson(Long idPessoa) {
         return enderecoMapper.toDtoList(enderecoRepository.findByPessoaId(idPessoa));
-    }
-
-    private Endereco isPrincipal(Endereco endereco){
-        if(Boolean.TRUE.equals(endereco.getPrincipal())) {
-            return endereco;
-        } else {
-            notPrincipalAddress(endereco);
-            endereco.setPrincipal(true);
-            enderecoRepository.save(endereco);
-            return endereco;
-        }
     }
 
     private void notPrincipalAddress (Endereco endereco) {
@@ -56,9 +53,24 @@ public class EnderecoServiceImpl implements EnderecoService {
         });
     }
     @Override
-    public List<EnderecoDTO> updatePrincipalAddress(Long id) {
-        Optional<Endereco> endereco = enderecoRepository.findById(id);
-        Endereco result = isPrincipal(endereco.get());
-        return enderecoMapper.toDtoList(enderecoRepository.findByPessoaId(result.getPessoa().getId()));
+    public EnderecoDTO updateAddress(Long id, CreateOrUpdateEnderecoDTO enderecoDTO) {
+        Endereco endereco = enderecoMapper.toEntity(findById(id));
+        BeanUtils.copyProperties(enderecoDTO, endereco);
+        if(Boolean.TRUE.equals(endereco.getPrincipal())){
+            notPrincipalAddress(endereco);
+        }
+        return enderecoMapper.toDto(enderecoRepository.save(endereco));
+    }
+
+    @Override
+    public EnderecoDTO findById(Long idEndereco) {
+        Optional<Endereco> endereco = enderecoRepository.findById(idEndereco);
+        return enderecoMapper.toDto(endereco.get());
+    }
+
+    @Override
+    public EnderecoDTO findByIdAndIdPessoa(Long idEndereco, Long idPessoa) {
+        Pessoa pessoa = pessoaMapper.toEntity(pessoaService.findById(idPessoa));
+        return enderecoRepository.findByIdAndPessoa(idEndereco, pessoa).map(enderecoMapper :: toDto).orElseThrow();
     }
 }

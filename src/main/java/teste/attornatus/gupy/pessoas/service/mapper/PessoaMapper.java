@@ -3,6 +3,7 @@ package teste.attornatus.gupy.pessoas.service.mapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import teste.attornatus.gupy.pessoas.domain.Pessoa;
+import teste.attornatus.gupy.pessoas.service.dto.CreateOrUpdatePessoaDTO;
 import teste.attornatus.gupy.pessoas.service.dto.PessoaDTO;
 
 import java.util.ArrayList;
@@ -17,6 +18,12 @@ public class PessoaMapper {
     }
 
     public Pessoa toEntity(PessoaDTO pessoaDTO) {
+        Pessoa pessoa = new Pessoa();
+        BeanUtils.copyProperties(pessoaDTO, pessoa);
+        return pessoa;
+    }
+
+    public Pessoa toEntity(CreateOrUpdatePessoaDTO pessoaDTO) {
         Pessoa pessoa = new Pessoa();
         BeanUtils.copyProperties(pessoaDTO, pessoa);
         return pessoa;

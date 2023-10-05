@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import teste.attornatus.gupy.pessoas.domain.Pessoa;
 import teste.attornatus.gupy.pessoas.repository.PessoaRepository;
 import teste.attornatus.gupy.pessoas.service.PessoaService;
+import teste.attornatus.gupy.pessoas.service.dto.CreateOrUpdatePessoaDTO;
 import teste.attornatus.gupy.pessoas.service.dto.PessoaDTO;
 import teste.attornatus.gupy.pessoas.service.mapper.PessoaMapper;
 
@@ -22,15 +23,16 @@ public class PessoaServiceImpl implements PessoaService {
 
 
     @Override
-    public PessoaDTO save(PessoaDTO pessoaDTO) {
+    public PessoaDTO save(CreateOrUpdatePessoaDTO pessoaDTO) {
         Pessoa pessoa = pessoaMapper.toEntity(pessoaDTO);
         return pessoaMapper.toDto(pessoaRepository.save(pessoa));
 
     }
 
     @Override
-    public PessoaDTO update(PessoaDTO pessoaDTO) {
+    public PessoaDTO update(Long id, CreateOrUpdatePessoaDTO pessoaDTO) {
         Pessoa pessoaUpdated = pessoaMapper.toEntity(pessoaDTO);
+        pessoaUpdated.setId(id);
         return pessoaMapper.toDto(pessoaRepository.save(pessoaUpdated));
 
     }
@@ -41,13 +43,7 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     @Override
-    public List<PessoaDTO> listAllPersonName(String name) {
-        List<Pessoa> pessoaList = pessoaRepository.findByNome(name);
-        return pessoaMapper.toDtoList(pessoaList);
-    }
-
-    @Override
-    public Optional<PessoaDTO> findById(Long id) {
-        return pessoaRepository.findById(id).map(pessoaMapper :: toDto);
+    public PessoaDTO findById(Long id) {
+        return pessoaRepository.findById(id).map(pessoaMapper :: toDto).orElseThrow();
     }
 }

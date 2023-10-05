@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import teste.attornatus.gupy.pessoas.domain.Endereco;
+import teste.attornatus.gupy.pessoas.service.dto.CreateOrUpdateEnderecoDTO;
 import teste.attornatus.gupy.pessoas.service.dto.EnderecoDTO;
 
 import java.util.ArrayList;
@@ -25,6 +26,13 @@ public class EnderecoMapper {
         Endereco endereco = new Endereco();
         BeanUtils.copyProperties(enderecoDTO, endereco);
         endereco.setPessoa(pessoaMapper.toEntity(enderecoDTO.getPessoa()));
+
+        return endereco;
+    }
+
+    public Endereco toEntity(CreateOrUpdateEnderecoDTO enderecoDTO) {
+        Endereco endereco = new Endereco();
+        BeanUtils.copyProperties(enderecoDTO, endereco);
 
         return endereco;
     }
