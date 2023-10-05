@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import teste.attornatus.gupy.pessoas.exceptions.PessoaNotFoundException;
 import teste.attornatus.gupy.pessoas.repository.PessoaRepository;
 import teste.attornatus.gupy.pessoas.service.PessoaService;
 import teste.attornatus.gupy.pessoas.service.dto.CreateOrUpdatePessoaDTO;
@@ -14,7 +15,6 @@ import teste.attornatus.gupy.pessoas.service.dto.PessoaDTO;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Optional;
 
 @AllArgsConstructor
 @RestController
@@ -37,9 +37,8 @@ public class PessoaController {
     @PutMapping("/{id}")
     public ResponseEntity<PessoaDTO> updatePessoa(
             @PathVariable(value = "id", required = true) Long id,
-            @RequestBody CreateOrUpdatePessoaDTO pessoaDTO){
+            @RequestBody CreateOrUpdatePessoaDTO pessoaDTO) throws PessoaNotFoundException {
         log.debug("try to update Pessoa : {}", pessoaDTO);
-        if (!pessoaRepository.existsById(id)) return ResponseEntity.notFound().header("Error", "Pessoa nao encontrada").build();
 
         PessoaDTO result = pessoaService.update(id, pessoaDTO);
         return ResponseEntity.ok().body(result);
@@ -53,9 +52,8 @@ public class PessoaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PessoaDTO> findById(@PathVariable(value = "id", required = true) Long id) {
+    public ResponseEntity<PessoaDTO> findById(@PathVariable(value = "id", required = true) Long id) throws PessoaNotFoundException {
         PessoaDTO result = pessoaService.findById(id);
         return ResponseEntity.ok().body(result);
-
     }
  }

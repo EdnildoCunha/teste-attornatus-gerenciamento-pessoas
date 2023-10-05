@@ -1,8 +1,11 @@
 package teste.attornatus.gupy.pessoas.service.implement;
 
 import lombok.AllArgsConstructor;
+import net.bytebuddy.implementation.bytecode.Throw;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import teste.attornatus.gupy.pessoas.domain.Pessoa;
+import teste.attornatus.gupy.pessoas.exceptions.PessoaNotFoundException;
 import teste.attornatus.gupy.pessoas.repository.PessoaRepository;
 import teste.attornatus.gupy.pessoas.service.PessoaService;
 import teste.attornatus.gupy.pessoas.service.dto.CreateOrUpdatePessoaDTO;
@@ -30,11 +33,11 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     @Override
-    public PessoaDTO update(Long id, CreateOrUpdatePessoaDTO pessoaDTO) {
-        Pessoa pessoaUpdated = pessoaMapper.toEntity(pessoaDTO);
-        pessoaUpdated.setId(id);
-        return pessoaMapper.toDto(pessoaRepository.save(pessoaUpdated));
+    public PessoaDTO update(Long id, CreateOrUpdatePessoaDTO pessoaDTO) throws PessoaNotFoundException {
+        Pessoa pessoa = pessoaMapper.toEntity(findById(id));
+        BeanUtils.copyProperties(pessoaDTO, pessoa);
 
+        return pessoaMapper.toDto(pessoaRepository.save(pessoa));
     }
 
     @Override
@@ -43,7 +46,8 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     @Override
-    public PessoaDTO findById(Long id) {
-        return pessoaRepository.findById(id).map(pessoaMapper :: toDto).orElseThrow();
+    public PessoaDTO findById(Long id) throws PessoaNotFoundException {
+        return pessoaRepository.findById(id).map(pessoaMapper :: toDto)
+                .orElseThrow(() -> new PessoaNotFoundException("Pessoa não encontrada, id: " + id));
     }
 }
